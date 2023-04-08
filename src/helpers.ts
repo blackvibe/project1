@@ -54,11 +54,3 @@ export function fuzzySearch(searchTerm: string, jsonData: any, keys: any[]) {
 
 
 function damerauLevenshteinDistance(r: string,e: string){if(r===e)return 0;var n,t,$,a=r.length,f=e.length;if(0===a)return f;if(0===f)return a;for(var i=a+1,u=Array(i),h=Array(i),c=0,o=0;c<i;)u[c]=c++;for(;o<f;){for(n=e.charAt(o++),h[0]=o,c=0;c<a;)t=u[c]-(r.charAt(c)===n?1:0),h[c]<t&&(t=h[c]),u[++c]<t&&(t=u[c]),h[c]=t+1;$=u,u=h,h=$}return u[a]}
-
-
-export function clickOutside(el: { contains: (arg0: any) => any; }, accessor: () => { (): any; new(): any; }) {
-  const onClick = (e: { target: any; }) => !el.contains(e.target) && accessor()?.();
-  document.body.addEventListener("click", onClick);
-
-  onCleanup(() => document.body.removeEventListener("click", onClick));
-}

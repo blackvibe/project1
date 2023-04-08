@@ -1,4 +1,8 @@
+import { createSignal } from "solid-js";
+
 export let t: any = {};
+// export let currentUser:any = {}
+export const [currentUser, setCurrentUser]:any = createSignal({})
 
 export async function updateTranslations() {
     try {
@@ -9,3 +13,7 @@ export async function updateTranslations() {
         console.log("error fetch trs")
     } 
 }
+
+// export async function setUser(userData:any) {
+//     currentUser = userData
+// }

@@ -2,7 +2,7 @@
 import { fuzzySearch } from "../helpers";
 import { createSignal, createEffect } from 'solid-js';
 import { createStore, produce } from "solid-js/store";
-import { t } from "./../store";
+import { t, currentUser } from "./../store";
 
 export default function SearchServices(props: any) {
 
@@ -14,16 +14,19 @@ export default function SearchServices(props: any) {
 
 
     createEffect(() => {
-        const searchServices = searchValue().trim().length > 0
+
+        const searchVal = searchValue().trim().length
+        const searchServices = searchVal
             ? fuzzySearch(searchValue().trim(), props.store.services, ["LocalizedName", "LocalizedDescription"])
             : props.store.services;
+
         props.setStore(produce((store: any) => {
-            store.filteredServices = searchServices
-                ?.map((service: any) => store.filteredServices.find((fs: any) => fs.Uid === service.Uid) || service)
-                .filter((service: any) => searchServices.some((fs: any) => fs.Uid === service.Uid));
+
+            store.filteredServices = (searchVal ? searchServices : store.services).map((service: any) => {
+                return Object.assign(store.filteredServices.find((filtererdService: any) => filtererdService.Uid === service.Uid) ?? service, service)
+            });
+
         }));
-
-
     });
 
     return (

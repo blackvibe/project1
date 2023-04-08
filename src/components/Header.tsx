@@ -1,11 +1,10 @@
 import { useLocation, A } from "solid-start";
-import { createSignal, Show } from "solid-js";
-import { t } from "../store";
+import { createEffect, createRenderEffect, createSignal, Show } from "solid-js";
+import { currentUser, t } from "../store";
 
 export default function Header(props:any) {
 
     const [sidebarIsShow, setSidebarIsShow] = createSignal(false);
-    const [ userBalance, setUserBalance ] = createSignal(0);
 
     function showSidebar() {
         setSidebarIsShow(!sidebarIsShow());
@@ -21,7 +20,7 @@ export default function Header(props:any) {
             return (
                 <>
                   <header class="mx-auto max-w-screen-xl px-2 sm:px-6 mt-5 mb-5">
-                    <a
+                    <A
                       href="/"
                       class="inline-block text-teal-600 transition hover:text-orange-600"
                     >
@@ -37,35 +36,35 @@ export default function Header(props:any) {
                           d="m7 10.25.43.76c.28.48.42.72.42.99s-.14.5-.42 1l-.43.75c-1.24 2.17-1.86 3.25-1.38 3.8.49.53 1.63.03 3.92-.97l6.27-2.75c1.8-.78 2.7-1.18 2.7-1.83 0-.65-.9-1.05-2.7-1.83L9.54 7.42c-2.29-1-3.43-1.5-3.92-.96-.48.54.14 1.62 1.38 3.79Z"
                         />
                       </svg>
-                    </a>
+                    </A>
             
                     <div class="float-right inline-block text-sm text-gray-600">
                       <nav class="hidden md:inline-block leading-[48px]">
                         <ul class="">
                           <li class="inline">
-                            <a class="transition hover:text-gray-400" href="/about">
-                              { t.strings?.About }
-                            </a>
+                            <A class="transition hover:text-gray-400" href="/info/about">
+                              { t.header?.About }
+                            </A>
                           </li>
                           <li class="inline ml-5">
-                            <a class="transition hover:text-gray-400" href="/offer">
-                              {t.strings?.Offer}
-                            </a>
+                            <A class="transition hover:text-gray-400" href="/info/offer">
+                              {t.header?.Offer}
+                            </A>
                           </li>
                           <li class="inline ml-5">
-                            <a class="transition hover:text-gray-400" href="/contacts">
-                              {t.strings?.Contacts}
-                            </a>
+                            <A class="transition hover:text-gray-400" href="/info/contacts">
+                              {t.header?.Contacts}
+                            </A>
                           </li>
                           <li class="inline ml-5">
-                            <a class="transition hover:text-gray-400" href="/api">
-                              {t.strings?.api}
-                            </a>
+                            <A class="transition hover:text-gray-400" href="/info/api">
+                              {t.header?.api}
+                            </A>
                           </li>
                         </ul>
                       </nav>
                       <div class="float-right sm:ml-10 text-white cursor-pointer font-medium select-none">
-                        <Show when={props.user?.Auth}>
+                        <Show when={currentUser()?.Auth}>
                           <a
                             href="/payment/pay"
                             class="transition px-4 inline-block rounded-full shadow bg-teal-600 p-2.5 hover:bg-teal-700 mr-1"
@@ -84,7 +83,7 @@ export default function Header(props:any) {
                                 d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5z"
                               />
                             </svg>
-                            <span>Баланс: {userBalance()} ₽</span>
+                            <span>Баланс: {currentUser().Balance} ₽</span>
                           </a>
                           <a
                             href="/payment/pay"
@@ -106,7 +105,7 @@ export default function Header(props:any) {
                             </svg>
                           </a>
                           <Show
-                            when={props.user.Balance == 0 && props.path != "/payment/pay" && !sidebarIsShow()}
+                            when={currentUser().Balance == 0 && props.path != "/payment/pay" && !sidebarIsShow()}
                           >
                             <div class="tooltip absolute select-none bg-orange-500 after:!border-t-orange-500 animate-bounce pl-4 pt-2 pb-2 rounded-2xl mt-7 z-20 w-[200px] after:right-[14%]">
                               <p>{t.tooltip?.start_work}</p>
@@ -135,7 +134,7 @@ export default function Header(props:any) {
                           </a>
                         </Show>
             
-                        <Show when={!props.user?.Auth}>
+                        <Show when={!currentUser() || currentUser()?.Auth === false}>
                           <a
                             href="/auth/login"
                             class="transition inline-block rounded-3xl px-4 shadow bg-teal-600 p-2.5  hover:bg-teal-700"

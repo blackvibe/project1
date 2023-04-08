@@ -2,9 +2,9 @@ import { createCookieSessionStorage, redirect } from "solid-start";
 
 const storage = createCookieSessionStorage({
     cookie: {
-        name: "session",
-        secure: false,
-        secrets: ["adwdq32d32"],
+        name: "masik_eat_cookie",
+        secure: process.env.NODE_ENV === "production",
+        secrets: ["TjWnZr4u7w!z%C*F-JaNdRgUkXp2s5v8"],
         sameSite: "lax",
         path: "/",
         maxAge: 60 * 60 * 24 * 30, // 30 days
@@ -20,6 +20,15 @@ export async function getUserToken(request: Request): Promise<User | null> {
     return userToken
 }
 
+export async function logout(request: Request) {
+    const session = await storage.getSession(request.headers.get("Cookie"));
+
+    return redirect("/", {
+        headers: {
+            "Set-Cookie": await storage.destroySession(session)
+        }
+    });
+}
 export async function createUserSession(userToken: string, redirectTo: string) {
     const session = await storage.getSession();
     session.set("userToken", userToken);
@@ -32,12 +41,17 @@ export async function createUserSession(userToken: string, redirectTo: string) {
 
 export async function getUser(request: Request): Promise<User | null> {
     const userToken = await getUserToken(request)
-    const userResponse = await fetch(
-        "https://api.smsvibe.ru/api/user/getUserInfo?token=" + userToken);
 
-    const user = await userResponse.json();
-    console.log(user)
-    return user
+    if (userToken) {
+        const userResponse = await fetch(
+            "https://api.smsvibe.ru/api/user/getUserInfo?isInfo=true&token=" + userToken);
+
+        const user = await userResponse.json();
+        console.log(user)
+        return user
+    } else {
+        return null
+    }
 }
 
 

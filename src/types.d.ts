@@ -31,3 +31,11 @@ type Register = {
     password: string
     passwordRepeat: string
 }
+
+type Country = {
+    Code: string;
+    Name: string;
+    PhoneCode: string;
+    LocalizedName: string;
+  };
+  
