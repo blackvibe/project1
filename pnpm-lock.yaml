@@ -1,6 +1,9 @@
 lockfileVersion: '6.0'
 
 dependencies:
+  '@solid-primitives/keyed':
+    specifier: ^1.1.10
+    version: 1.1.10(solid-js@1.7.1)
   '@solidjs/meta':
     specifier: ^0.28.4
     version: 0.28.4(solid-js@1.7.1)
@@ -1484,6 +1487,14 @@ packages:
 
   /@sideway/pinpoint@2.0.0:
     resolution: {integrity: sha512-RNiOoTPkptFtSVzQevY/yWtZwf/RxyVnPy/OcA9HBM3MlGDnBEYL5B41H0MTn0Uec8Hi+2qUtTfG2WWZBmMejQ==}
+
+  /@solid-primitives/keyed@1.1.10(solid-js@1.7.1):
+    resolution: {integrity: sha512-J3TI4hL+C5Btc078BvlebUbUf0GQP3b/1fGfBHzfdgK32dTBsZsxCk/qU1IP03b6VJFkNteeVhK9pPeUARk80g==}
+    peerDependencies:
+      solid-js: ^1.6.12
+    dependencies:
+      solid-js: 1.7.1
+    dev: false
 
   /@solidjs/meta@0.28.4(solid-js@1.7.1):
     resolution: {integrity: sha512-1USElsQuGVcJnmZ6CxPfUVmKvCsVdBQoGrUyMxLtFw36Ytt90dPs/qLyXLvPR/ZPD16/qauWqg6APEkbrDOLcA==}

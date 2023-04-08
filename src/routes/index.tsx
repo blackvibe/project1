@@ -1,31 +1,50 @@
-import { A } from "solid-start";
-import Counter from "~/components/Counter";
+import { A, Title, createRouteData, refetchRouteData } from "solid-start";
+import { t } from "./../store"
+import { For, createEffect, createRenderEffect, createResource, createSignal } from 'solid-js';
+import { useRouteData, useIsRouting } from "solid-start";
+import { isServer } from "solid-js/web";
+import { createStore, produce } from "solid-js/store";
+import SearchServices from "~/components/SearchServices";
+
+const [store, setStore] = createStore<ServiceStore>({ services: [], filteredServices: [] });
+
+export function routeData() {
+  return createRouteData(async () => {
+    const response = await fetch("https://api.smsvibe.ru/api/getServices?country=ru");
+    return await response.json() as Service[];
+  }, { key: ['services'] });
+}
+
+async function updateServices() {
+  await refetchRouteData(["services"])
+  // setTimeout(updateServices, 1000)
+}
 
 export default function Home() {
+  const services = useRouteData<typeof routeData>();
+
+  createRenderEffect(() => {
+    setStore("filteredServices", services)
+    setStore("services", services())
+  })
+
+  if (!isServer) updateServices()
+
   return (
-    <main class="text-center mx-auto text-gray-700 p-4">
-      <h1 class="max-6-xs text-6xl text-sky-700 font-thin uppercase my-16">
-        Hello world!
-      </h1>
-      <Counter />
-      <p class="mt-8">
-        Visit{" "}
-        <a
-          href="https://solidjs.com"
-          target="_blank"
-          class="text-sky-600 hover:underline"
-        >
-          solidjs.com
-        </a>{" "}
-        to learn how to build Solid apps.
-      </p>
-      <p class="my-4">
-        <span>Home</span>
-        {" - "}
-        <A href="/about" class="text-sky-600 hover:underline">
-          About Page
-        </A>{" "}
-      </p>
-    </main>
+    <>
+      <Title>{t.title.home}</Title>
+      <main class="text-center mx-auto text-gray-700 p-4">
+
+        <SearchServices store={store} setStore={setStore} filteredServices={store.filteredServices} />
+        <For each={store.filteredServices}>
+          {(service) => (
+            <div onClick={() => refetchRouteData(["services"])}>{service.LocalizedName} {service.Count}</div>
+          )}
+
+        </For>
+
+      </main>
+    </>
+
   );
 }
