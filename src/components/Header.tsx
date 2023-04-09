@@ -1,10 +1,15 @@
 import { useLocation, A } from "solid-start";
-import { createEffect, createRenderEffect, createSignal, Show } from "solid-js";
-import { currentUser, t } from "../store";
+import { createSignal, Show } from "solid-js";
+import { t } from "../store";
+import { createServerData$ } from "solid-start/server";
 
 export default function Header(props:any) {
 
     const [sidebarIsShow, setSidebarIsShow] = createSignal(false);
+
+    const user:any = createServerData$((_, event) => {
+      return event.locals.user
+    });
 
     function showSidebar() {
         setSidebarIsShow(!sidebarIsShow());
@@ -14,8 +19,8 @@ export default function Header(props:any) {
     const location = useLocation();
     const active = (path: string) =>
         path == location.pathname
-            ? "border-sky-600"
-            : "border-transparent hover:border-sky-600";
+            ? "border-teal-600"
+            : "border-transparent hover:border-teal-600";
 
             return (
                 <>
@@ -41,31 +46,76 @@ export default function Header(props:any) {
                     <div class="float-right inline-block text-sm text-gray-600">
                       <nav class="hidden md:inline-block leading-[48px]">
                         <ul class="">
-                          <li class="inline">
-                            <A class="transition hover:text-gray-400" href="/info/about">
-                              { t.header?.About }
+                          <li class="inline"> 
+                            <A class={active("/info/about") + " border-b-2 pb-1 transition"} href="/info/about">
+                              { t.header?.About } {JSON.stringify(user)}
                             </A>
                           </li>
                           <li class="inline ml-5">
-                            <A class="transition hover:text-gray-400" href="/info/offer">
+                            <A class={active("/info/offer") + " border-b-2 pb-1 transition"} href="/info/offer">
                               {t.header?.Offer}
                             </A>
                           </li>
                           <li class="inline ml-5">
-                            <A class="transition hover:text-gray-400" href="/info/contacts">
+                            <A class={active("/info/contacts") + " border-b-2 pb-1 transition"} href="/info/contacts">
                               {t.header?.Contacts}
                             </A>
                           </li>
                           <li class="inline ml-5">
-                            <A class="transition hover:text-gray-400" href="/info/api">
+                            <A class={active("/info/api") + " border-b-2 pb-1 transition"} href="/info/api">
                               {t.header?.api}
                             </A>
                           </li>
                         </ul>
                       </nav>
                       <div class="float-right sm:ml-10 text-white cursor-pointer font-medium select-none">
-                        <Show when={currentUser()?.Auth}>
-                          <a
+                      <Show when={!user()}>
+                          
+                          <A
+                            href="/auth/login"
+                            class="transition inline-block rounded-3xl px-4 shadow bg-teal-600 p-2.5  hover:bg-teal-700"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="1.5"
+                              class="w-6 h-6 inline-block"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M15.6 14.4a6 6 0 0 1-5.8 7.3V17m5.8-2.6a15 15 0 0 0 6.2-12.2A15 15 0 0 0 9.6 8.4m6 6A15 15 0 0 1 9.8 17m-.2-8.6a6 6 0 0 0-7.3 5.9H7m2.5-5.9A15 15 0 0 0 7 14.3M9.8 17h-.4A15 15 0 0 1 7 14.6a14.9 14.9 0 0 1 0-.3m-2.2 2.3A4.5 4.5 0 0 0 3.1 21a4.5 4.5 0 0 0 4.3-1.7M16.5 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"
+                              />
+                            </svg>
+                            {t.auth?.Login}
+                          </A>
+                          <A
+                            href="/auth/register"
+                            class=" hidden sm:inline-block rounded-3xl text-white bg-sky-700 transition hover:bg-sky-800 p-2.5 px-4 ml-2"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="1.5"
+                              class="w-6 h-6 inline-block"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.3-4.1a3.4 3.4 0 1 1-6.7 0 3.4 3.4 0 0 1 6.8 0zM4 19.2v0a6.4 6.4 0 0 1 12.8 0v0a12.3 12.3 0 0 1-6.4 1.8C8 21 5.9 20.4 4 19.2z"
+                              />
+                            </svg>
+            
+                            {t.auth?.Register}
+                          </A>
+                        </Show>
+                        
+                        <Show when={user()}>
+                          <A
                             href="/payment/pay"
                             class="transition px-4 inline-block rounded-full shadow bg-teal-600 p-2.5 hover:bg-teal-700 mr-1"
                           >
@@ -83,9 +133,9 @@ export default function Header(props:any) {
                                 d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5z"
                               />
                             </svg>
-                            <span>Баланс: {currentUser().Balance} ₽</span>
-                          </a>
-                          <a
+                            <span>Баланс: {user().Balance} ₽</span>
+                          </A>
+                          <A
                             href="/payment/pay"
                             class="transition inline-block rounded-full shadow bg-teal-600 p-2.5  hover:bg-teal-700"
                           >
@@ -103,9 +153,9 @@ export default function Header(props:any) {
                                 d="M12 6v12m6-6H6"
                               />
                             </svg>
-                          </a>
+                          </A>
                           <Show
-                            when={currentUser().Balance == 0 && props.path != "/payment/pay" && !sidebarIsShow()}
+                            when={user().Balance == 0 && props.path != "/payment/pay" && !sidebarIsShow()}
                           >
                             <div class="tooltip absolute select-none bg-orange-500 after:!border-t-orange-500 animate-bounce pl-4 pt-2 pb-2 rounded-2xl mt-7 z-20 w-[200px] after:right-[14%]">
                               <p>{t.tooltip?.start_work}</p>
@@ -133,50 +183,7 @@ export default function Header(props:any) {
                             Выйти
                           </a>
                         </Show>
-            
-                        <Show when={!currentUser() || currentUser()?.Auth === false}>
-                          <a
-                            href="/auth/login"
-                            class="transition inline-block rounded-3xl px-4 shadow bg-teal-600 p-2.5  hover:bg-teal-700"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="1.5"
-                              class="w-6 h-6 inline-block"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M15.6 14.4a6 6 0 0 1-5.8 7.3V17m5.8-2.6a15 15 0 0 0 6.2-12.2A15 15 0 0 0 9.6 8.4m6 6A15 15 0 0 1 9.8 17m-.2-8.6a6 6 0 0 0-7.3 5.9H7m2.5-5.9A15 15 0 0 0 7 14.3M9.8 17h-.4A15 15 0 0 1 7 14.6a14.9 14.9 0 0 1 0-.3m-2.2 2.3A4.5 4.5 0 0 0 3.1 21a4.5 4.5 0 0 0 4.3-1.7M16.5 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"
-                              />
-                            </svg>
-                            {t.auth?.Login}
-                          </a>
-                          <a
-                            href="/auth/register"
-                            class=" hidden sm:inline-block rounded-3xl text-white bg-sky-700 transition hover:bg-sky-800 p-2.5 px-4 ml-2"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="1.5"
-                              class="w-6 h-6 inline-block"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.3-4.1a3.4 3.4 0 1 1-6.7 0 3.4 3.4 0 0 1 6.8 0zM4 19.2v0a6.4 6.4 0 0 1 12.8 0v0a12.3 12.3 0 0 1-6.4 1.8C8 21 5.9 20.4 4 19.2z"
-                              />
-                            </svg>
-            
-                            {t.auth?.Register}
-                          </a>
-                        </Show>
+                        
             
                         <span
                           onClick={showSidebar}

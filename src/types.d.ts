@@ -10,9 +10,17 @@ type Service = {
     Uid: string;
 }
 
-type ServiceStore = {
+type Order = {
+    ID : number
+    NumberCode: string
+    Number: string
+    Slug: string
+}
+
+type MainStore = {
     services: Service[] | undefined;
     filteredServices: Service[] | undefined;
+    orders: Order[] | undefined
 }
 
 type User = {
@@ -20,6 +28,7 @@ type User = {
     Auth: boolean, 
     Email: string, 
     Balance: number
+    Token: string
 }
 
 type Login = {

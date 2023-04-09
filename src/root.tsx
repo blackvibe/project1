@@ -12,13 +12,13 @@ import {
   Routes,
   Scripts,
   Title,
+  useRouteData,
 } from "solid-start";
 import "./tailwind.css";
-import { t, currentUser } from "./store"
 import Header from "./components/Header";
+import { Transition, TransitionGroup } from "solid-transition-group";
 
 export default function Root() {
-
   return (
     <Html lang="ru">
       <Head>
@@ -32,10 +32,13 @@ export default function Root() {
       <Body>
         <Suspense>
           <ErrorBoundary>
-            <Header/>
+            <Header />
+            <Transition name="pageTransition">
             <Routes>
               <FileRoutes/>
             </Routes>
+            </Transition>
+            
           </ErrorBoundary>
         </Suspense>
         <Scripts />

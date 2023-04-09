@@ -1,17 +1,24 @@
-import { A, RouteDataArgs, Title, createRouteData, refetchRouteData } from "solid-start";
-import { t, currentUser, setCurrentUser } from "./../store"
-import { For, Show, createEffect, createRenderEffect, createResource, createSignal } from 'solid-js';
-import { useRouteData, useIsRouting } from "solid-start";
-import { isServer } from "solid-js/web";
+import { Title } from "solid-start";
+import { t } from "./../store"
+import { For, Show, createRenderEffect, createResource, createSignal } from 'solid-js';
+import { useRouteData } from "solid-start";
 import { createStore, produce } from "solid-js/store";
 import SearchServices from "~/components/SearchServices";
 import NotFound from "~/components/NotFound";
 import CountrySelector from "~/components/CountrySelector";
 import { createServerData$ } from "solid-start/server";
 import LoadingPanel from "~/components/LoadingPanel";
+import Orders from "~/components/Orders";
+import { ShowToast } from "~/components/Toast";
+import Modal from "~/components/Modal";
 
-const [store, setStore] = createStore<ServiceStore>({ services: [], filteredServices: [] });
+const [store, setStore] = createStore<MainStore>({ services: [], filteredServices: [], orders: [] });
 const [isShowLoadingPanel, setIsShowLoadingPanel] = createSignal(false);
+const [isModalShow, setIsModalShow] = createSignal(false);
+const [modalData, setModalData] = createSignal();
+const [modalLoading, setModalLoading] = createSignal(false);
+const [selectedService, setSelectedService]: any = createSignal();
+
 const [currentCountry, setCurrentCountry] = createSignal({
   Code: "ru",
   PhoneCode: 7,
@@ -23,8 +30,10 @@ let servicesListRef: any
 export function routeData() {
   const [services] = createResource(async () => await getServices());
   const [countries] = createResource(async () => await getCountries());
+  const user: any = createServerData$(async (_, event) => event.locals.user);
+  const orders = createServerData$(async (_, event: any) => await getOrders(event.locals.user.Token))
 
-  return { services, countries }
+  return { services, countries, user, orders }
 }
 
 async function getServices() {
@@ -34,6 +43,11 @@ async function getServices() {
 async function getCountries() {
   const response = await fetch("https://api.smsvibe.ru/api/getCountries");
   return await response.json() as Country[];
+}
+
+async function getOrders(userToken: string) {
+  const response = await fetch("https://api.smsvibe.ru/api/user/getOrders?token=" + userToken);
+  return await response.json() as Order[];
 }
 
 async function updateServices(isCountryChanging = false) {
@@ -49,17 +63,87 @@ async function updateServices(isCountryChanging = false) {
 }
 
 export default function Home() {
-  const { services, countries } = useRouteData<typeof routeData>();
+  const { services, countries, user, orders }: any = useRouteData<typeof routeData>();
 
   createRenderEffect(() => {
     setStore("filteredServices", services)
     setStore("services", services)
+    setStore("orders", orders()?.Orders)
   })
 
   //if (!isServer) setTimeout(updateServices, 4000)
 
   function makeOrder(service: Service): void {
-    throw new Error("Function not implemented.");
+    if (!user().Auth) {
+      return ShowToast(t.main?.notyf_login_message, "error");
+    }
+
+    setSelectedService(service);
+
+    setModalData({
+      title: t.buyModal?.title + service.LocalizedName,
+      message: t.buyModal?.message,
+      firstBtnMsg: t.buyModal?.button_yes,
+      secondBtnMsg: t.buyModal?.button_no,
+      btnWaitText: t.buyModal?.button_wait,
+      tip: t.buyModal?.tip,
+      iconClass: service.Slug,
+      badge: service.Price + " ₽",
+      mainBtnBgColor: "bg-teal-600 hover:bg-teal-700",
+    });
+
+    setIsModalShow(true);
+  }
+
+  async function CancelOrder() {
+    setIsModalShow(false);
+  }
+
+  function addOrder(order: any) {
+    setStore(
+      'orders',
+      produce((orders: any) => {
+        orders.unshift(order);
+      }),
+    );
+
+    //updateBalance(props.user)
+  }
+
+  async function ConfirmOrder() {
+    setModalLoading(true);
+
+    let orderServiceResponse, orderServiceJson, orderStatus: any
+
+    try {
+      orderServiceResponse = await fetch(
+        "https://api.smsvibe.ru/api/user/orderService?token=" + user().Token + "&slug=" +
+        selectedService().Slug + "&country=" + selectedService().Country);
+      orderServiceJson = await orderServiceResponse.json();
+      orderStatus = orderServiceJson.Status;
+
+      if (orderStatus != false) {
+
+        addOrder(orderServiceJson);
+        ShowToast(t.order?.purchase_success_message, "success");
+
+      } else {
+        switch (orderServiceJson.Reason) {
+          case "NOT_ENOUGH_MONEY":
+            ShowToast(t.order?.low_balance_message, "error");
+            break
+          case "GET_SERVICE_RESULT_ERROR":
+            ShowToast(t.order?.unknown_error_message, "error");
+            break
+        }
+      }
+    } catch {
+      console.log("fail to order Service")
+    }
+
+    setModalLoading(false);
+    setIsModalShow(false);
+
   }
 
   return (
@@ -76,6 +160,13 @@ export default function Home() {
 
         <div class="overflow-hidden rounded-3xl ml-2 mr-2 md:ml-0 md:mr-0 shadow-xl border">
           <div class="relative md:h-[425px]">
+            <Modal
+              isShow={isModalShow()}
+              data={modalData()}
+              isLoading={modalLoading()}
+              cancel={CancelOrder}
+              confirm={ConfirmOrder}
+            />
             <SearchServices store={store} setStore={setStore} filteredServices={store.filteredServices} />
 
             <LoadingPanel isShow={isShowLoadingPanel()} />
@@ -106,7 +197,7 @@ export default function Home() {
                           </span>
                         </p>
                         <p class="text-[14px] font-medium text-gray-500">
-                          <Show when={currentUser()?.ID === 1}>
+                          <Show when={user()?.ID === 1}>
                             {service.Prefix}{" "}
                           </Show>
                           <span>Страна: {t.country && t.country[service.Country]}. </span>
@@ -145,6 +236,7 @@ export default function Home() {
               />
             </Show>
           </div>
+          <Orders orders={store.orders} setStore={setStore} user={user()} />
         </div>
       </main>
     </>

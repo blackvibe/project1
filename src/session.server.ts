@@ -47,7 +47,6 @@ export async function getUser(request: Request): Promise<User | null> {
             "https://api.smsvibe.ru/api/user/getUserInfo?isInfo=true&token=" + userToken);
 
         const user = await userResponse.json();
-        console.log(user)
         return user
     } else {
         return null
@@ -79,9 +78,7 @@ export async function login({ email, password }: Login) {
     );
 
     if (response.ok) {
-        var authResponse = await response.json();
-
-        return authResponse
+        return await response.json();
     } else {
         return false
     }

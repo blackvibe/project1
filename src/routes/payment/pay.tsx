@@ -1,34 +1,49 @@
-import { createSignal, Show, onMount, createResource } from "solid-js";
+import { createSignal, Show, onMount, createResource, createRenderEffect } from "solid-js";
 import { ShowToast, Toast } from "../../components/Toast";
-import { currentUser, setCurrentUser } from "../../store";
-import { useRouteData } from "solid-start";
+import { RouteDataArgs, useRouteData } from "solid-start";
+import { isServer } from "solid-js/web";
+import { createStore } from "solid-js/store";
+import { createServerData$, redirect } from "solid-start/server";
 
 export function routeData() {
-  const [user] = createResource(() => currentUser());
-
-  return { user }
+  return createServerData$((_, event) => {
+    return event.locals.user
+  });
 }
 
 export default function Pay() {
-  const { user } = useRouteData<typeof routeData>();
+  const userData = useRouteData<typeof routeData>();
 
-  const [typingTimer, setTypingTimer] = createSignal(null);
+  const [typingTimer, setTypingTimer]: any = createSignal(null);
   const [isLoading, setIsLoading] = createSignal(true);
-  const [amount, setAmount] = createSignal("50");
+  const [amount, setAmount]: any = createSignal("50");
   const [amountLabel, setAmountLabel] = createSignal("50");
   const [loadingLabel, setLoadingLabel] = createSignal("Подождите, загружается форма оплаты")
   const [isPayComplete, setIsPayComplete] = createSignal(false)
   const [confToken, setConfToken] = createSignal("")
+  const [user, setUser]: any = createSignal([])
 
-  
 
-  onMount(async () => {
-    await showPayForm()
-  });
+  createRenderEffect(async () => {
+    setUser(userData())
+
+    if (!isServer) {
+
+      const script = document.createElement('script');
+
+      script.src = "https://yookassa.ru/checkout-widget/v1/checkout-widget.js";
+      script.async = true;
+      script.onload = async () => {
+        await showPayForm()
+      }
+
+      document.body.appendChild(script);
+    }
+  })
 
   function checkIframeLoading() {
     const paymentFormIframe = document.querySelector("#payment-form iframe");
-    paymentFormIframe.addEventListener("load", hideLoading);
+    paymentFormIframe?.addEventListener("load", hideLoading);
   }
 
   function hideLoading() {
@@ -39,7 +54,7 @@ export default function Pay() {
     setIsLoading(true)
   }
 
-  function handleKeyUp(e) {
+  function handleKeyUp(e: any) {
     clearTimeout(typingTimer());
     setTypingTimer(setTimeout(() => doneTyping(e), 400));
   }
@@ -50,15 +65,20 @@ export default function Pay() {
 
   let payFormActionCompleted = false
 
-  function renderPayForm(confirmation_token) {
+  async function renderPayForm(confirmation_token: string) {
 
-    document.getElementById("payment-form").innerHTML = "";
+    const paymentForm = document.getElementById("payment-form")
 
+    if (paymentForm) {
+      paymentForm.innerHTML = "";
+    }
+
+    //@ts-ignore
     const checkout = new window.YooMoneyCheckoutWidget({
       confirmation_token: confirmation_token,
       return_url: "",
       customization: {},
-      error_callback: function (error) {
+      error_callback: function (error: any) {
         console.log(error);
       },
     });
@@ -79,7 +99,7 @@ export default function Pay() {
           const response = await checkPay(confToken().replace("ct-", ""));
           if (response.Status === true) {
             setIsPayComplete(true);
-            setUserBalance(Number(currentUser().Balance) + Number(amount()));
+            //setCurrentUser({ Balance: Number(user()?.Balance) + Number(amount()) });
           }
           setTimeout(startCheck, 1000);
         }
@@ -89,12 +109,12 @@ export default function Pay() {
 
     })
   }
-  async function checkPay(pay_id:string) {
-    const checkPayResponse = await fetch("https://api.smsvibe.ru/api/user/checkPay?token=" + currentUser().Token + "&operation_id=" + pay_id)
+  async function checkPay(pay_id: string) {
+    const checkPayResponse = await fetch("https://api.smsvibe.ru/api/user/checkPay?token=" + user().Token + "&operation_id=" + pay_id)
     return await checkPayResponse.json()
   }
 
-  async function doneTyping(e) {
+  async function doneTyping(e: any) {
     setAmount(e.target.value);
 
     if (amount().trim().length === 0) {
@@ -107,8 +127,11 @@ export default function Pay() {
         "За один раз можно пополнить баланс не более чем 60 000 рублей.",
       underLimit: "Пополнение должно быть не менее 50 рублей!",
     };
-    function isNumeric(str:any) {
+
+    function isNumeric(str: any) {
+
       if (typeof str !== "string") return false;
+      //@ts-ignore
       return !isNaN(str) && !isNaN(parseFloat(str));
     }
 
@@ -140,12 +163,12 @@ export default function Pay() {
     checkIframeLoading();
   }
 
-  async function getConfirmationToken(amount:any) {
+  async function getConfirmationToken(amount: any) {
 
     amount = amount ? amount : ""
 
     const response = await fetch(
-      "https://api.smsvibe.ru/api/user/getPayInfo?amount=" + amount + "&token=" + user().Token
+      "https://api.smsvibe.ru/api/user/getPayInfo?amount=" + amount + "&token=" + user()?.Token
     );
     return await response.text();
   }

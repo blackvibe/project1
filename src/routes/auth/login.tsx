@@ -5,7 +5,16 @@ import { getUser, login } from "./../../session.server";
 import { createUserSession } from "../../session.server"
 import { createCookieSessionStorage, FormError, RouteDataArgs, useRouteData } from "solid-start";
 
-export default function Login(props: any) {
+export function routeData() {
+
+    return createServerData$((_, event:any) => {
+        if (event.locals.user?.Auth) {
+            throw redirect("/")
+        }
+    });
+}
+
+export default function Login() {
     const [isLoading, setIsLoading] = createSignal(false);
 
     let formRef: any
@@ -28,7 +37,7 @@ export default function Login(props: any) {
                 }
             }
         } else {
-            return createUserSession(user?.Token, "/");
+            return createUserSession(user.Token, "/");
         }
 
     });
