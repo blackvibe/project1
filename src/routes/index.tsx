@@ -31,7 +31,7 @@ export function routeData() {
   const [services] = createResource(async () => await getServices());
   const [countries] = createResource(async () => await getCountries());
   const user: any = createServerData$(async (_, event) => event.locals.user);
-  const orders = createServerData$(async (_, event: any) => await getOrders(event.locals.user.Token))
+  const orders = createServerData$(async (_, event: any) => await getOrders(event.locals.user?.Token))
 
   return { services, countries, user, orders }
 }

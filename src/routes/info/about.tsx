@@ -7,7 +7,7 @@ export default function About() {
      <Title>{t.title.about}</Title>
      <main class="m-auto max-w-lg">
 		
-		<div class="p-10 sm:p-0">
+		<div class="p-6 sm:p-10 overflow-hidden rounded-3xl ml-2 mr-2 md:ml-0 md:mr-0 shadow-xl border">
             <h1 class="text-4xl mb-8 text-gray-600">Повесть о нашем проекте :)</h1>
             <p class="font-semibold">Наш сервис СМС позволяет вам получать текстовые сообщения на временный, виртуальный
                 номер телефона. Это может быть особенно полезно в ситуациях, когда вам необходимо получать СМС для проверки,
