@@ -34,7 +34,7 @@ export default function Root() {
       </Head>
       <Body classList={{ "grey-out": isRouting() }}>
         <Show when={isRouting()}>
-          <div class="w-full h-full absolute top-0 h-1 rounded-full bg-teal-600" style="transform: translateX(-100%);animation: 5000ms ease 0s infinite normal none running Page-Loading-Bar;transform-origin: left center;"></div>
+          <div class="w-full h-full absolute top-0 rounded-full bg-teal-600" style="transform: translateX(-100%);animation: 5000ms ease 0s infinite normal none running Page-Loading-Bar;transform-origin: left center; height: 5px"></div>
         </Show>
         <Suspense>
           <ErrorBoundary>
