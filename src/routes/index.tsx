@@ -1,4 +1,4 @@
-import { Title } from "solid-start";
+import { Meta, Title } from "solid-start";
 import { t } from "./../store"
 import { For, Show, createRenderEffect, createResource, createSignal } from 'solid-js';
 import { useRouteData } from "solid-start";
@@ -9,7 +9,7 @@ import CountrySelector from "~/components/CountrySelector";
 import { createServerData$ } from "solid-start/server";
 import LoadingPanel from "~/components/LoadingPanel";
 import Orders from "~/components/Orders";
-import { ShowToast } from "~/components/Toast";
+import { ShowToast, Toast } from "~/components/Toast";
 import Modal from "~/components/Modal";
 
 const [store, setStore] = createStore<MainStore>({ services: [], filteredServices: [], orders: [] });
@@ -74,8 +74,9 @@ export default function Home() {
   //if (!isServer) setTimeout(updateServices, 4000)
 
   function makeOrder(service: Service): void {
-    if (!user().Auth) {
-      return ShowToast(t.main?.notyf_login_message, "error");
+
+    if (!user()?.Auth) {
+      return ShowToast(t.toast?.title.not_auth, t.toast?.message.not_auth, "error");
     }
 
     setSelectedService(service);
@@ -125,15 +126,15 @@ export default function Home() {
       if (orderStatus != false) {
 
         addOrder(orderServiceJson);
-        ShowToast(t.order?.purchase_success_message, "success");
+        ShowToast(t.toast?.title.purchase_success, t.toast?.message.purchase_success, "success");
 
       } else {
         switch (orderServiceJson.Reason) {
           case "NOT_ENOUGH_MONEY":
-            ShowToast(t.order?.low_balance_message, "error");
+            ShowToast(t.toast?.title.low_balance, t.toast?.message.low_balance, "error");
             break
           case "GET_SERVICE_RESULT_ERROR":
-            ShowToast(t.order?.unknown_error_message, "error");
+            ShowToast(t.toast?.title.unknown_error, t.toast?.message.unknown_error, "error");
             break
         }
       }
@@ -149,6 +150,7 @@ export default function Home() {
   return (
     <>
       <Title>{t.title.home}</Title>
+      <Meta name="description" content={t.description.home} />
 
       <main class="m-auto max-w-lg select-none">
         <CountrySelector
@@ -157,7 +159,7 @@ export default function Home() {
           currentCountry={currentCountry()}
           setCurrentCountry={setCurrentCountry}
         />
-
+        <Toast/>
         <div class="overflow-hidden rounded-3xl ml-2 mr-2 md:ml-0 md:mr-0 shadow-xl border">
           <div class="relative md:h-[425px]">
             <Modal

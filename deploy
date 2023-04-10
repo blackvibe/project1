@@ -1,0 +1,19 @@
+#!/bin/bash
+
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+echo -e "${GREEN}НАЧИНАЮ СТРОИТЬ ПРИЛОЖЕНИЕ...${NC}"
+pnpm run build
+echo -e "${GREEN}ПРИЛОЖЕНИЕ ПОСТРОЕНО УСПЕШНО!${NC}"
+
+rsync -avz --exclude={deploy,.git,.vscode,.solid,node_modules,src,.gitignore,.env,postcss.config.cjs,tailwind.config.cjs,tsconfig.json,vite.config.ts} -e "ssh -i /root/.ssh/smskeynew" /home/project1/ root@5.23.55.114:/home/smsvibe/ --delete
+
+
+
+echo -e "${GREEN}Начинаю запуск на удаленном сервере...${NC}"
+ssh -i /root/.ssh/smskeynew root@5.23.55.114 'cd /home/smsvibe && pnpm install && pm2 stop server || true && pm2 start dist/server.js && pm2 save'
+
+echo -e "${GREEN}ДЕПЛОЙ ЗАВЕРШЕН, можно идти пить кофе :) ${NC}"
+
+exit 0

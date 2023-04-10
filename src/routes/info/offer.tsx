@@ -1,10 +1,11 @@
-import { A, Title } from "solid-start";
+import { A, Meta, Title } from "solid-start";
 import { t } from "./../../store"
 
 export default function Contacts() {
   return (
     <>
       <Title>{t.title.offer}</Title>
+      <Meta name="description" content={t.description.offer} />
       <main class="m-auto max-w-lg">
         <div class="p-6 sm:p-10 overflow-hidden rounded-3xl ml-2 mr-2 md:ml-0 md:mr-0 shadow-xl border">
           <h1 class="text-4xl mb-8 text-gray-600">Публичная оферта на оказание посреднических и технических услуг​</h1>

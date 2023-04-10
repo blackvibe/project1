@@ -63,7 +63,7 @@ export default function Orders(props: any) {
     if (cancelOrderResponseJson) {
 
       if (cancelOrderResponseJson.Reason === "TIME_DONT_EXPIRED") {
-        ShowToast("Номер можно удалить только через 2 минуты после покупки", "error");
+        ShowToast(t.toast?.title.time_dont_expired, t.toast?.message.time_dont_expired, "error");
       } else {
         props.setStore(
           'orders',
@@ -72,7 +72,7 @@ export default function Orders(props: any) {
           }),
         );
         //setCurrentUser(props.user)
-        ShowToast("Номер был удален", "success");
+        ShowToast(t.toast?.title.number_deleted_ok, t.toast?.message.number_deleted_ok, "success");
       }
 
     }

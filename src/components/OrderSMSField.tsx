@@ -18,7 +18,8 @@ export default function SMS(props:any) {
 
       DismissToasts();
       ShowToast(
-        `${t.order?.sms_code} ${props.order?.SMS} \n ${t.orders?.sms_copied_message}`,
+        t.toast?.title.sms_copied,
+        `${t.toast?.message.sms_code} ${props.order?.SMS} \n ${t.toast?.message.sms_copied}`,
         "success"
       );
     }

@@ -1,9 +1,10 @@
 import { createSignal, Show, onMount, createResource, createRenderEffect } from "solid-js";
 import { ShowToast, Toast } from "../../components/Toast";
-import { RouteDataArgs, useRouteData } from "solid-start";
+import { Meta, RouteDataArgs, Title, useRouteData } from "solid-start";
 import { isServer } from "solid-js/web";
 import { createStore } from "solid-js/store";
 import { createServerData$, redirect } from "solid-start/server";
+import { t } from "~/store";
 
 export function routeData() {
   return createServerData$((_, event) => {
@@ -175,6 +176,8 @@ export default function Pay() {
 
   return (
     <>
+      <Title>{t.title.pay}</Title>
+      <Meta name="description" content={t.description.pay} />
       <main class="m-auto max-w-lg select-none">
         <Toast />
 

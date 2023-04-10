@@ -16,9 +16,10 @@ export default function Number(props:any) {
 
     DismissToasts();
     ShowToast(
+      t.toast?.title.number_copied,
       `+${props.order.NumberCode} ${formatPhoneNumber(
         props.order.Number
-      )} \n ${t.orders.number_copied_message}`,
+      )} \n ${t.toast?.message.number_copied}`,
       "success"
     );
   }

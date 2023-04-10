@@ -1,10 +1,11 @@
-import { A, Title } from "solid-start";
+import { A, Meta, Title } from "solid-start";
 import { t } from "./../../store"
 
 export default function Contacts() {
   return (
     <>
      <Title>{t.title.refund}</Title>
+     <Meta name="description" content={t.description.refund}/>
      <main class="m-auto max-w-lg">
     <div class="p-10 sm:p-0">
       <h1 class="text-4xl mb-8 text-gray-600">
